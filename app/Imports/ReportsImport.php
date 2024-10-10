@@ -33,7 +33,7 @@ class ReportsImport implements ToCollection, WithStartRow, WithMapping
     {
         foreach ($rows as $row) {
             if (isset($row['key'])) {
-                \Log::info("Collected rows: ".$row); // Log the final result
+                // \Log::info("Collected rows: ".$row); // Log the final result
                 $this->rows[] = $row;
             }
         }

@@ -35,7 +35,7 @@ class FinancesImport implements ToCollection, WithStartRow, WithMapping, WithMul
     // Map each row to a key-value pair from specific columns (A as key, B as value)
     public function map($row): array
     {
-        \Log::info('Row data being mapped:', $row);
+        // \Log::info('Row data being mapped:', $row);
 
         return [
             'key' => $row[0],  // Column A (description)
@@ -48,11 +48,11 @@ class FinancesImport implements ToCollection, WithStartRow, WithMapping, WithMul
     {
         foreach ($rows as $row) {
             if (isset($row['key'])) {
-                \Log::info("Collected rows: ".$row); // Log the final result
+                // \Log::info("Collected rows: ".$row); // Log the final result
                 $this->rows[] = $row;
             }
         }
 
-        \Log::info("Final collected rows: ", $this->rows); // Log the final result
+        // \Log::info("Final collected rows: ", $this->rows); // Log the final result
     }
 }
