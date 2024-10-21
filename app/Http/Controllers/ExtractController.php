@@ -57,6 +57,7 @@ class ExtractController extends Controller
 
         // Return the extracted key-value pairs as JSON
         return response()->json([
+            'message' => 'Success',
             'data' => [
                 'balanceSheet' => $balanceSheet,
                 'lossProfit' => $lossProfit,
