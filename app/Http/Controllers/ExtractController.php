@@ -17,249 +17,137 @@ class ExtractController extends Controller
 {
     public function extract(Request $request)
     {
-        // Validate the file input and sheet name
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
-        ]);
-
-        // COMPANY DATA
-        $sheetName = 2;
-        $import = new FinancesImport($sheetName);
-
-        Excel::import($import, $request->file('file'));
-        
-        // GET DATA
-        $companyData = $import->sheets()[$sheetName]->rows ?? [];
-        $companyName = $companyData['Nama entitas'] ?? '';
-        $companyCode = $companyData['Kode entitas'] ?? '';
-        $periodeFinance = $companyData['Periode penyampaian laporan keuangan'] ?? '';
-
-        $periodeMapping = [
-            'Kuartal I / First Quarter' => 'Q1',
-            'Kuartal II / Second Quarter' => 'Q2',
-            'Kuartal III / Third Quarter' => 'Q3',
-        ];
-        $periodeFinance = $periodeMapping[$periodeFinance] ?? $periodeFinance;
-
-        $tahunFinance = '';
-        if(isset($companyData['Tanggal awal periode berjalan'])){
-            $tahunFinance = explode('-', $companyData['Tanggal awal periode berjalan'])[0];
-        }
-
-        // CHECK IF COMPANY EXIST
-        $companyRecord = Companies::where([
-            'CompanyName' => $companyName,
-            'CompanyCode' => $companyCode
-        ])->first();
-        $companyID = $companyRecord->CompanyID ?? '';
-
-        if(!$companyID){
-            // INSERT DATA
-            $companyInsert = Companies::create([
-                'CompanyName' => $companyName,
-                'CompanyCode' => $companyCode,
-                'Status' => 'Y',
-                'CreateWho' => 'TEST_ADMIN',
-                'ChangeWho' => 'TEST_ADMIN',
+        try {
+            // Validate the file input and sheet name
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls,csv'
             ]);
-            $companyID = $companyInsert->CompanyID;
-        }
 
-        // GET ITEMS
-        $itemRecords = Items::where([
-            'Status' => 'Y'
-        ])->get()->keyBy('ItemName');
+            // COMPANY DATA
+            $sheetName = 2;
+            $import = new FinancesImport($sheetName);
 
-        // BALANCE SHEETS
-        $sheetName = 3; 
-        $import = new FinancesImport($sheetName);
-
-        Excel::import($import, $request->file('file'));
-        
-        $balanceSheet = $import->sheets()[$sheetName]->rows ?? [];
-        foreach ($balanceSheet as $key => $value) {
-            // GET ITEMS DATA
-            if(!$itemRecords->has($key)){
-                continue;
-            }
-            $itemData = $itemRecords->get($key);
-
-            // GET VALUE
-            $balanceSheetRecords = BalanceSheets::where([
-                'Status' => 'Y',
-                'CompanyID' => $companyID,
-                'ItemID' => $itemData->ItemID,
-            ])->first();
+            Excel::import($import, $request->file('file'));
             
-            if($balanceSheetRecords){
-                $valueRecord = $balanceSheetRecords->ItemValue;
+            // GET DATA
+            $companyData = $import->sheets()[$sheetName]->rows ?? [];
+            $companyName = $companyData['Nama entitas'] ?? '';
+            $companyCode = $companyData['Kode entitas'] ?? '';
+            $periodeFinance = $companyData['Periode penyampaian laporan keuangan'] ?? '';
 
-                // CHECK YEAR
-                if(!isset($valueRecord[$tahunFinance])){
-                    $valueRecord[$tahunFinance] = [];
-                }
-            }else{
-                $valueRecord[$tahunFinance] = [];
+            $periodeMapping = [
+                'Kuartal I / First Quarter' => 'Q1',
+                'Kuartal II / Second Quarter' => 'Q2',
+                'Kuartal III / Third Quarter' => 'Q3',
+            ];
+            $periodeFinance = $periodeMapping[$periodeFinance] ?? $periodeFinance;
+
+            $tahunFinance = '';
+            if(isset($companyData['Tanggal awal periode berjalan'])){
+                $tahunFinance = explode('-', $companyData['Tanggal awal periode berjalan'])[0];
             }
 
-            $valueRecord[$tahunFinance][$periodeFinance] = $value;
-
-            if($balanceSheetRecords){
-                BalanceSheets::where([
-                    'Status' => 'Y',
-                    'CompanyID' => $companyID,
-                    'ItemID' => $itemData->ItemID 
-                ])->update([
-                    'ItemValue' => $valueRecord,
-                    'CreateWho' => 'TEST_ADMIN',
-                    'ChangeWho' => 'TEST_ADMIN',
-                ]);
-            }else{
-                BalanceSheets::create([
-                    'CompanyID' => $companyID,
-                    'CompanyName' => $companyName,
-                    'CompanyCode' => $companyCode,
-                    'ItemID' => $itemData->ItemID, // TODO : Change to dynamic
-                    'ItemName' => $key,
-                    'ItemValue' => $valueRecord,
-                    'ItemParent' => $itemData->ItemParent, // TODO : Change to dynamic
-                    'Status' => 'Y',
-                    'CreateWho' => 'TEST_ADMIN',
-                    'ChangeWho' => 'TEST_ADMIN',
-                ]);
-            }
-        }
-
-        // LOSS PROFIT
-        $sheetName = 4; 
-        $import = new FinancesImport($sheetName);
-
-        Excel::import($import, $request->file('file'));
-        
-        $lossAndProfit = $import->sheets()[$sheetName]->rows ?? [];
-        foreach ($lossAndProfit as $key => $value) {
-            // GET ITEMS DATA
-            if(!$itemRecords->has($key)){
-                continue;
-            }
-            $itemData = $itemRecords->get($key);
-
-            // GET VALUE
-            $lossAndProfitRecords = LossAndProfits::where([
-                'Status' => 'Y',
-                'CompanyID' => $companyID,
-                'ItemID' => $itemData->ItemID,
+            // CHECK IF COMPANY EXIST
+            $companyRecord = Companies::where([
+                'CompanyName' => $companyName,
+                'CompanyCode' => $companyCode
             ])->first();
+            $companyID = $companyRecord->CompanyID ?? '';
 
-            if($lossAndProfitRecords){
-                $valueRecord = $lossAndProfitRecords->ItemValue;
-
-                // CHECK YEAR
-                if(!isset($valueRecord[$tahunFinance])){
-                    $valueRecord[$tahunFinance] = [];
-                }
-            }else{
-                $valueRecord[$tahunFinance] = [];
-            }
-
-            $valueRecord[$tahunFinance][$periodeFinance] = $value;
-
-            if($lossAndProfitRecords){
-                LossAndProfits::where([
-                    'Status' => 'Y',
-                    'CompanyID' => $companyID,
-                    'ItemID' => $itemData->ItemID 
-                ])->update([
-                    'ItemValue' => $valueRecord,
-                    'CreateWho' => 'TEST_ADMIN',
-                    'ChangeWho' => 'TEST_ADMIN',
-                ]);
-            }else{
-                LossAndProfits::create([
-                    'CompanyID' => $companyID,
+            if(!$companyID){
+                // INSERT DATA
+                $companyInsert = Companies::create([
                     'CompanyName' => $companyName,
                     'CompanyCode' => $companyCode,
-                    'ItemID' => $itemData->ItemID, // TODO : Change to dynamic
-                    'ItemName' => $key,
-                    'ItemValue' => $valueRecord,
-                    'ItemParent' => $itemData->ItemParent, // TODO : Change to dynamic
                     'Status' => 'Y',
                     'CreateWho' => 'TEST_ADMIN',
                     'ChangeWho' => 'TEST_ADMIN',
                 ]);
+                $companyID = $companyInsert->CompanyID;
             }
+
+            // GET ITEMS
+            $itemRecords = Items::where([
+                'Status' => 'Y'
+            ])->get()->keyBy('ItemName');
+
+            // BALANCE SHEETS
+            $this->storeFinancialData(3, BalanceSheets::class, $companyID, $companyName, $companyCode, $itemRecords, $tahunFinance, $periodeFinance, $request);
+
+            // LOSS PROFIT
+            $this->storeFinancialData(4, LossAndProfits::class, $companyID, $companyName, $companyCode, $itemRecords, $tahunFinance, $periodeFinance, $request);
+
+            // CASH FLOW
+            $this->storeFinancialData(7, CashFlows::class, $companyID, $companyName, $companyCode, $itemRecords, $tahunFinance, 
+            $periodeFinance, $request);
+
+            // Return the extracted key-value pairs as JSON
+            return response()->json([
+                'message' => 'Success'
+            ]);   
+        } catch (Exception $e) {
+            \Log::error('Error extracting data: '.$e->getMessage());
+            return response()->json(['message' => 'Error processing', 'error' => $e->getMessage()], 500);
         }
-
-        // CASH FLOW
-        $sheetName = 7; 
-        $import = new FinancesImport($sheetName);
-
-        Excel::import($import, $request->file('file'));
-        
-        $cashFlow = $import->sheets()[$sheetName]->rows ?? [];
-        foreach ($cashFlow as $key => $value) {
-            // GET ITEMS DATA
-            if(!$itemRecords->has($key)){
-                continue;
-            }
-            $itemData = $itemRecords->get($key);
-
-            // GET VALUE
-            $cashFlowRecords = CashFlows::where([
-                'Status' => 'Y',
-                'CompanyID' => $companyID,
-                'ItemID' => $itemData->ItemID,
-            ])->first();
-            
-            if($cashFlowRecords){
-                $valueRecord = $cashFlowRecords->ItemValue;
-
-                // CHECK YEAR
-                if(!isset($valueRecord[$tahunFinance])){
-                    $valueRecord[$tahunFinance] = [];
-                }
-            }else{
-                $valueRecord[$tahunFinance] = [];
-            }
-
-            $valueRecord[$tahunFinance][$periodeFinance] = $value;
-
-            if($cashFlowRecords){
-                CashFlows::where([
-                    'Status' => 'Y',
-                    'CompanyID' => $companyID,
-                    'ItemID' => $itemData->ItemID 
-                ])->update([
-                    'ItemValue' => $valueRecord,
-                    'CreateWho' => 'TEST_ADMIN',
-                    'ChangeWho' => 'TEST_ADMIN',
-                ]);
-            }else{
-                CashFlows::create([
-                    'CompanyID' => $companyID,
-                    'CompanyName' => $companyName,
-                    'CompanyCode' => $companyCode,
-                    'ItemID' => $itemData->ItemID, // TODO : Change to dynamic
-                    'ItemName' => $key,
-                    'ItemValue' => $valueRecord,
-                    'ItemParent' => $itemData->ItemParent, // TODO : Change to dynamic
-                    'Status' => 'Y',
-                    'CreateWho' => 'TEST_ADMIN',
-                    'ChangeWho' => 'TEST_ADMIN',
-                ]);
-            }
-        }
-
-        // Return the extracted key-value pairs as JSON
-        return response()->json([
-            'message' => 'Success',
-            'data' => [
-                'balanceSheet' => $balanceSheet,
-                'lossProfit' => $lossProfit,
-                'cashFlow' => $cashFlow,
-            ]
-        ]);
     }
 
-    
+    private function storeFinancialData($sheetName, $modelName, $companyID, $companyName, $companyCode, $itemRecords, $tahunFinance, $periodeFinance, $request)
+    {
+        $import = new FinancesImport($sheetName);
+
+        Excel::import($import, $request->file('file'));
+        
+        $sheetData = $import->sheets()[$sheetName]->rows ?? [];
+        foreach ($sheetData as $key => $value) {
+            // GET ITEMS DATA
+            if(!$itemRecords->has($key)){
+                continue;
+            }
+            $itemData = $itemRecords->get($key);
+
+            // GET VALUE
+            $sheetRecords = $modelName::where([
+                'Status' => 'Y',
+                'CompanyID' => $companyID,
+                'ItemID' => $itemData->ItemID,
+            ])->first();
+            
+            if($sheetRecords){
+                $valueRecord = $sheetRecords->ItemValue;
+
+                // CHECK YEAR
+                if(!isset($valueRecord[$tahunFinance])){
+                    $valueRecord[$tahunFinance] = [];
+                }
+            }else{
+                $valueRecord[$tahunFinance] = [];
+            }
+
+            $valueRecord[$tahunFinance][$periodeFinance] = $value;
+
+            if($sheetRecords){
+                $modelName::where([
+                    'Status' => 'Y',
+                    'CompanyID' => $companyID,
+                    'ItemID' => $itemData->ItemID 
+                ])->update([
+                    'ItemValue' => $valueRecord,
+                    'ChangeWho' => 'TEST_ADMIN',
+                ]);
+            }else{
+                $modelName::create([
+                    'CompanyID' => $companyID,
+                    'CompanyName' => $companyName,
+                    'CompanyCode' => $companyCode,
+                    'ItemID' => $itemData->ItemID, // TODO : Change to dynamic
+                    'ItemName' => $key,
+                    'ItemValue' => $valueRecord,
+                    'ItemParent' => $itemData->ItemParent, // TODO : Change to dynamic
+                    'Status' => 'Y',
+                    'CreateWho' => 'TEST_ADMIN',
+                    'ChangeWho' => 'TEST_ADMIN',
+                ]);
+            }
+        }
+    }
 }
