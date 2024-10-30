@@ -56,55 +56,7 @@ class FinancesImport implements ToCollection, WithStartRow, WithMapping, WithMul
             if (isset($row['key'])) {
                 // LOG THE ITERATION
                 \Log::info("Collected rows: ".$row); 
-
-                // SEARCH
-                // INSERT TO DATABASE
-                // BalanceSheets
-                if($this->sheetName == '3'){
-                    BalanceSheets::create([
-                        'CompanyID' => '1',
-                        'CompanyName' => 'Prasanna',
-                        'CompanyCode' => 'MPRASN',
-                        'ItemID' => '1',
-                        'ItemName' => $row['key'],
-                        'ItemValue' => $row['value'],
-                        'ItemParent' => 'test',
-                        'Status' => 'Y',
-                        'CreateWho' => 'TEST_ADMIN',
-                        'ChangeWho' => 'TEST_ADMIN',
-                    ]);
-                }
-                // LossAndProfits
-                else if ($this->sheetName == '4'){
-                    LossAndProfits::create([
-                        'CompanyID' => '1',
-                        'CompanyName' => 'Prasanna',
-                        'CompanyCode' => 'MPRASN',
-                        'ItemID' => '1',
-                        'ItemName' => $row['key'],
-                        'ItemValue' => $row['value'],
-                        'ItemParent' => 'test',
-                        'Status' => 'Y',
-                        'CreateWho' => 'TEST_ADMIN',
-                        'ChangeWho' => 'TEST_ADMIN',
-                    ]);
-                }
-                // CashFlows
-                else if ($this->sheetName == '7'){
-                    CashFlows::create([
-                        'CompanyID' => '1',
-                        'CompanyName' => 'Prasanna',
-                        'CompanyCode' => 'MPRASN',
-                        'ItemID' => '1',
-                        'ItemName' => $row['key'],
-                        'ItemValue' => $row['value'],
-                        'ItemParent' => 'test',
-                        'Status' => 'Y',
-                        'CreateWho' => 'TEST_ADMIN',
-                        'ChangeWho' => 'TEST_ADMIN',
-                    ]);
-                }
-
+                
                 // SAVE THE ROW
                 $this->rows[] = $row;
             }

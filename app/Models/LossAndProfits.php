@@ -39,4 +39,8 @@ class LossAndProfits extends Model
         'ChangeDate',
         'ChangeWho'
     ];
+
+    protected $casts = [
+        "ItemValue" => "array"
+    ];
 }

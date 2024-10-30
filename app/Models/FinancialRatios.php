@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class BalanceSheets extends Model
+class FinancialRatios extends Model
 {
     use HasFactory;
 
     // CONFIG
     
     // Explicitly define the table name
-    protected $table = 'BalanceSheets';
+    protected $table = 'Companies';
 
     // Set custom timestamp fields
     const CREATED_AT = 'CreateDate';
@@ -29,10 +29,8 @@ class BalanceSheets extends Model
         'CompanyID',
         'CompanyName',
         'CompanyCode',
-        'ItemID',
-        'ItemName',
-        'ItemValue',
-        'ItemParent',
+        'FinancialRatioName',
+        'FinancialRatioValue',
         'Status',
         'CreateDate',
         'CreateWho',
@@ -41,6 +39,6 @@ class BalanceSheets extends Model
     ];
 
     protected $casts = [
-        "ItemValue" => "array"
+        "FinancialRatioValue" => "array"
     ];
 }
