@@ -31,21 +31,33 @@ class ExtractController extends Controller
             
             // GET DATA
             $companyData = $import->sheets()[$sheetName]->rows ?? [];
-            $companyName = $companyData['Nama entitas'] ?? '';
-            $companyCode = $companyData['Kode entitas'] ?? '';
-            $periodeFinance = $companyData['Periode penyampaian laporan keuangan'] ?? '';
 
+            $companyName = '';
+            $companyCode = '';
+            $periodeFinance = '';
+            $tahunFinance = '';
+
+            foreach($companyData as $itemData){
+                switch($itemData['key']) {
+                    case 'Nama entitas':
+                        $companyName = $itemData['value'];
+                        break;
+                    case 'Kode entitas':
+                        $companyCode = $itemData['value'];
+                        break;
+                    case 'Periode penyampaian laporan keuangan':
+                        $periodeFinance = $itemData['value'];
+                        break;
+                    case 'Tanggal awal periode berjalan':
+                        $tahunFinance = explode('-', $itemData['value'])[0];
+                }
+            }
             $periodeMapping = [
                 'Kuartal I / First Quarter' => 'Q1',
                 'Kuartal II / Second Quarter' => 'Q2',
                 'Kuartal III / Third Quarter' => 'Q3',
             ];
             $periodeFinance = $periodeMapping[$periodeFinance] ?? $periodeFinance;
-
-            $tahunFinance = '';
-            if(isset($companyData['Tanggal awal periode berjalan'])){
-                $tahunFinance = explode('-', $companyData['Tanggal awal periode berjalan'])[0];
-            }
 
             // CHECK IF COMPANY EXIST
             $companyRecord = Companies::where([
@@ -63,8 +75,9 @@ class ExtractController extends Controller
                     'CreateWho' => 'TEST_ADMIN',
                     'ChangeWho' => 'TEST_ADMIN',
                 ]);
-                $companyID = $companyInsert->CompanyID;
+                $companyID = $companyInsert->id;
             }
+
 
             // GET ITEMS
             $itemRecords = Items::where([
@@ -98,18 +111,19 @@ class ExtractController extends Controller
         Excel::import($import, $request->file('file'));
         
         $sheetData = $import->sheets()[$sheetName]->rows ?? [];
-        foreach ($sheetData as $key => $value) {
+        foreach ($sheetData as $rowData) {
             // GET ITEMS DATA
-            if(!$itemRecords->has($key)){
+            if(!$itemRecords->has($rowData['key'])){
                 continue;
             }
-            $itemData = $itemRecords->get($key);
+            $itemData = $itemRecords->get($rowData['key']);
 
             // GET VALUE
             $sheetRecords = $modelName::where([
                 'Status' => 'Y',
                 'CompanyID' => $companyID,
-                'ItemID' => $itemData->ItemID,
+                'ItemID' => '1',
+                'ItemName' => $rowData['key'],
             ])->first();
             
             if($sheetRecords){
@@ -123,13 +137,13 @@ class ExtractController extends Controller
                 $valueRecord[$tahunFinance] = [];
             }
 
-            $valueRecord[$tahunFinance][$periodeFinance] = $value;
+            $valueRecord[$tahunFinance][$periodeFinance] = $rowData['value'];
 
             if($sheetRecords){
                 $modelName::where([
                     'Status' => 'Y',
                     'CompanyID' => $companyID,
-                    'ItemID' => $itemData->ItemID 
+                    'ItemID' => '1' 
                 ])->update([
                     'ItemValue' => $valueRecord,
                     'ChangeWho' => 'TEST_ADMIN',
@@ -140,7 +154,7 @@ class ExtractController extends Controller
                     'CompanyName' => $companyName,
                     'CompanyCode' => $companyCode,
                     'ItemID' => $itemData->ItemID, // TODO : Change to dynamic
-                    'ItemName' => $key,
+                    'ItemName' => $rowData['key'],
                     'ItemValue' => $valueRecord,
                     'ItemParent' => $itemData->ItemParent, // TODO : Change to dynamic
                     'Status' => 'Y',

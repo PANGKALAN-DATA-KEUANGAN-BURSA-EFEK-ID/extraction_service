@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('Items', function (Blueprint $table) {
             $table->id('ItemID');
             $table->string('ItemName', 255);
-            $table->string('ItemParent', 255);
+            $table->string('ItemParent', 255)->nullable();
             $table->char('Status', 1);
             $table->timestamp('CreateDate')->nullable();
             $table->string('CreateWho', 255);

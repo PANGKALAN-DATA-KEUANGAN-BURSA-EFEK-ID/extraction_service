@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExtractController;
+use App\Http\Controllers\FinancesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,17 @@ use App\Http\Controllers\ExtractController;
 
 
 Route::post('extracts', [ExtractController::class, 'extract']);
+
+Route::prefix('finances')->group(function() {
+    // GET /finances/balancesheet/{companyID}
+    Route::get('balancesheet/{companyID}', [FinanceController::class, 'balanceSheet']);
+
+    // GET /finances/lossandprofit/{companyID}
+    Route::get('lossandprofit/{companyID}', [FinanceController::class, 'lossAndProfit']);
+
+    // GET /finances/cashflow/{companyID}
+    Route::get('cashflow/{companyID}', [FinanceController::class, 'cashFlows']);
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
