@@ -122,7 +122,7 @@ class ExtractController extends Controller
             $sheetRecords = $modelName::where([
                 'Status' => 'Y',
                 'CompanyID' => $companyID,
-                'ItemID' => '1',
+                'ItemID' => $itemData->ItemID,
                 'ItemName' => $rowData['key'],
             ])->first();
             
@@ -143,7 +143,7 @@ class ExtractController extends Controller
                 $modelName::where([
                     'Status' => 'Y',
                     'CompanyID' => $companyID,
-                    'ItemID' => '1' 
+                    'ItemID' => $itemData->ItemID,
                 ])->update([
                     'ItemValue' => $valueRecord,
                     'ChangeWho' => 'TEST_ADMIN',
