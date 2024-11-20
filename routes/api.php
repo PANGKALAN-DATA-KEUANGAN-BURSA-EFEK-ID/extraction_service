@@ -47,7 +47,7 @@ Route::prefix('companies')->group(function() {
     // PUT /companies
     Route::put('/{id}', [CompanyController::class, 'update']);
     
-    // PUT /companies
+    // DELETE /companies
     Route::delete('/{id}', [CompanyController::class, 'destroy']);
 });
 
