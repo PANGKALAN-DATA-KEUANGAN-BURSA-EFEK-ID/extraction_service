@@ -10,6 +10,7 @@ class CashFlows extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'CashFlowID';
     
     // Explicitly define the table name
     protected $table = 'CashFlows';

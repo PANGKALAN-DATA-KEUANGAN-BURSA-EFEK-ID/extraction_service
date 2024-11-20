@@ -10,6 +10,7 @@ class FinancialRatios extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'FinacialRatioID';
     
     // Explicitly define the table name
     protected $table = 'Companies';

@@ -10,6 +10,7 @@ class Users extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'UserID';
     
     // Explicitly define the table name
     protected $table = 'Users';

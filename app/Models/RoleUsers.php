@@ -10,6 +10,7 @@ class RoleUsers extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'RoleUserID';
     
     // Explicitly define the table name
     protected $table = 'RoleUsers';

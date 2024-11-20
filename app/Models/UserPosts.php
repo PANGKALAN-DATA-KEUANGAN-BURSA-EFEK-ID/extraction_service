@@ -10,6 +10,7 @@ class UserPosts extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'UserPostID';
     
     // Explicitly define the table name
     protected $table = 'UserPosts';

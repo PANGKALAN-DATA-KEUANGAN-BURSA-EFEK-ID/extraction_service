@@ -10,6 +10,7 @@ class LossAndProfits extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'LossAndProfitID';
     
     // Explicitly define the table name
     protected $table = 'LossAndProfits';

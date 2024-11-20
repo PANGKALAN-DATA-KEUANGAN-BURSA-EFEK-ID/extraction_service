@@ -10,6 +10,7 @@ class UserFollows extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'UserFollowID';
     
     // Explicitly define the table name
     protected $table = 'UserFollows';

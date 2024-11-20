@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('LossAndProfits', function (Blueprint $table) {
-            $table->id('BalanceSheetID');
+            $table->id('LossAndProfitID');
             $table->foreignId('CompanyID')
                 ->references('CompanyID')
                 ->on('Companies');

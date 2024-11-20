@@ -10,7 +10,8 @@ class Companies extends Model
     use HasFactory;
 
     // CONFIG
-    
+    protected  $primaryKey = 'CompanyID';
+
     // Explicitly define the table name
     protected $table = 'Companies';
 

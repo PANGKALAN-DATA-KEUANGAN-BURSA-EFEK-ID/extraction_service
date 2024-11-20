@@ -10,6 +10,7 @@ class BalanceSheets extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'BalanceSheetID';
     
     // Explicitly define the table name
     protected $table = 'BalanceSheets';

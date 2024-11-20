@@ -10,6 +10,7 @@ class UserReplies extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'UserReplyID';
     
     // Explicitly define the table name
     protected $table = 'UserReplies';

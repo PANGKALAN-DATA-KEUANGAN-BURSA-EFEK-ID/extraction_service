@@ -10,6 +10,7 @@ class Items extends Model
     use HasFactory;
 
     // CONFIG
+    protected  $primaryKey = 'ItemID';
     
     // Explicitly define the table name
     protected $table = 'Items';
