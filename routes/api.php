@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExtractController;
-use App\Http\Controllers\FinancesController;
+use App\Http\Controllers\FinanceController;
 
 /*
 |--------------------------------------------------------------------------
