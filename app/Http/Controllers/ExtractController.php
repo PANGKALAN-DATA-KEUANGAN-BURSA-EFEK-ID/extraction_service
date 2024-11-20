@@ -75,7 +75,7 @@ class ExtractController extends Controller
                     'CreateWho' => 'TEST_ADMIN',
                     'ChangeWho' => 'TEST_ADMIN',
                 ]);
-                $companyID = $companyInsert->id;
+                $companyID = $companyInsert->CompanyID;
             }
 
 
@@ -96,7 +96,10 @@ class ExtractController extends Controller
 
             // Return the extracted key-value pairs as JSON
             return response()->json([
-                'message' => 'Success'
+                'message' => 'Success',
+                'data' => [
+                    'CompanyID' => $companyID,
+                ]
             ]);   
         } catch (Exception $e) {
             \Log::error('Error extracting data: '.$e->getMessage());

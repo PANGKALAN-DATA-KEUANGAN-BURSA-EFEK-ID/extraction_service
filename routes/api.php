@@ -18,7 +18,7 @@ use App\Http\Controllers\CompanyController;
 */
 
 Route::get('/', function(){
-    return "Live Server!!";
+    return "Server Backend berjalan....";
 });
 
 Route::post('extracts', [ExtractController::class, 'extract']);
@@ -31,7 +31,7 @@ Route::prefix('finances')->group(function() {
     Route::get('lossandprofit/{companyID}', [FinanceController::class, 'lossAndProfit']);
 
     // GET /finances/cashflow/{companyID}
-    Route::get('cashflow/{companyID}', [FinanceController::class, 'cashFlows']);
+    Route::get('cashflow/{companyID}', [FinanceController::class, 'cashFlow']);
 });
 
 Route::prefix('companies')->group(function() {
