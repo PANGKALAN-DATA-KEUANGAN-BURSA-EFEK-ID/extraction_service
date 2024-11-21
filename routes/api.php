@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExtractController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\RoleUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,23 @@ Route::prefix('companies')->group(function() {
     
     // DELETE /companies
     Route::delete('/{id}', [CompanyController::class, 'destroy']);
+});
+
+Route::prefix('role-users')->group(function() {
+    // GET /role-users
+    Route::get('', [RoleUserController::class, 'index']);
+    
+    // GET /role-users
+    Route::get('/{id}', [RoleUserController::class, 'show']);
+    
+    // POST /role-users
+    Route::post('', [RoleUserController::class, 'store']);
+    
+    // PUT /role-users
+    Route::put('/{id}', [RoleUserController::class, 'update']);
+    
+    // DELETE /role-users
+    Route::delete('/{id}', [RoleUserController::class, 'destroy']);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
