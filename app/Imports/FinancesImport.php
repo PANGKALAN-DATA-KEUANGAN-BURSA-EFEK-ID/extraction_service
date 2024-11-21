@@ -35,7 +35,7 @@ class FinancesImport implements ToCollection, WithStartRow, WithMapping, WithMul
     // Specify where to start reading data (skip the header row)
     public function startRow(): int
     {
-        return 6; // Start reading from row 2
+        return 5; // Start reading from row 2
     }
 
     // Map each row to a key-value pair from specific columns (A as key, B as value)

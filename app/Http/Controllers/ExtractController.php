@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Imports\FinancesImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
 
 class ExtractController extends Controller
 {
@@ -19,9 +20,21 @@ class ExtractController extends Controller
     {
         try {
             // Validate the file input and sheet name
-            $request->validate([
-                'file' => 'required|mimes:xlsx,xls,csv'
-            ]);
+
+            $validator = Validator::make(
+                [
+                    'file'      => $request->file('file'),
+                    'extension' => strtolower($request->file('file')->getClientOriginalExtension()),
+                ],
+                [
+                    'file'          => 'required',
+                    'extension'      => 'required|in:xlsx,xls',
+                ]
+            );
+
+            if ($validator->fails()) {
+                return response()->json(['message' => 'Error processing', 'error' => $validator], 500);
+            }
 
             // COMPANY DATA
             $sheetName = 2;
@@ -56,6 +69,7 @@ class ExtractController extends Controller
                 'Kuartal I / First Quarter' => 'Q1',
                 'Kuartal II / Second Quarter' => 'Q2',
                 'Kuartal III / Third Quarter' => 'Q3',
+                'Tahunan / Annual' => 'Q4'
             ];
             $periodeFinance = $periodeMapping[$periodeFinance] ?? $periodeFinance;
 
