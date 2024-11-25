@@ -11,9 +11,26 @@ use Illuminate\Http\Response;
 class RoleUserController extends Controller
 {
     // GET /roleusers
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(RoleUsers::all(), Response::HTTP_OK);
+        // Retrieve query parameters for name and role
+        $RoleUserName = $request->query('RoleUserName');
+    
+        // Build the query
+        $query = RoleUsers::query();
+    
+        if ($RoleUserName) {
+            $query->where('RoleUserName', 'LIKE', '%' . $RoleUserName . '%');
+        }
+    
+        // Execute the query and get the results
+        $roleUsers = $query->get();
+
+        if(count($roleUsers) < 1){
+            return response()->json(['message' => 'Role Users Empty', "data" => $roleUsers, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
+        }
+    
+        return response()->json(['message' => 'Role Users Found', "data" => $roleUsers, "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 
     // POST /roleusers
@@ -30,7 +47,7 @@ class RoleUserController extends Controller
             'ChangeWho' => 'TEST_ADMIN'
         ]);
 
-        return response()->json($roleUserData, Response::HTTP_CREATED);
+        return response()->json(['message' => 'Success', "data" => $roleUserData, "status" => Response::HTTP_CREATED], Response::HTTP_CREATED);
     }
 
     // GET /roleusers/{id}
@@ -39,10 +56,10 @@ class RoleUserController extends Controller
         $roleUserRecord = RoleUsers::find($id);
 
         if(!$roleUserRecord) {
-            return response()->json(['message' => 'Role User not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Role User not found', "data" => $roleUserRecord, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
-        return response()->json($roleUserRecord, Response::HTTP_OK);
+        return response()->json(['message' => 'Success', "data" => $roleUserRecord, "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 
     // PUT /roleusers/{id}
@@ -51,7 +68,7 @@ class RoleUserController extends Controller
         $roleUserRecord = RoleUsers::find($id);
 
         if(!$roleUserRecord) {
-            return response()->json(['message' => 'Role User not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Role User not found', "data" => $roleUserRecord, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
         $validatedData = $request->validate([
@@ -63,7 +80,8 @@ class RoleUserController extends Controller
             'ChangeWho' => "TEST_ADMIN"
         ]);
 
-        return response()->json($roleUserRecord, Response::HTTP_OK);
+
+        return response()->json(['message' => 'Success', "data" => $roleUserRecord, "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 
     // DELETE /roleusers/{id}
@@ -72,11 +90,11 @@ class RoleUserController extends Controller
         $roleUserRecord = RoleUsers::find($id);
 
         if(!$roleUserRecord){
-            return response()->json(['message' => 'Role User not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Role User not found', "data" => $roleUserRecord, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
         $roleUserRecord->delete();
 
-        return response()->json(['message' => 'Role User deleted successfully'], Response::HTTP_OK);
+        return response()->json(['message' => 'Role User deleted successfully', "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 }

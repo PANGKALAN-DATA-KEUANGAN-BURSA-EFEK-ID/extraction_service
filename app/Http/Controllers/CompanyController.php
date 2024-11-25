@@ -11,9 +11,31 @@ use Illuminate\Http\Response;
 class CompanyController extends Controller
 {
     // GET /companies
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Companies::all(), Response::HTTP_OK);
+        // Retrieve query parameters for name and role
+        $CompanyName = $request->query('CompanyName');
+        $CompanyCode = $request->query('CompanyCode');
+    
+        // Build the query
+        $query = Companies::query();
+    
+        if ($CompanyName) {
+            $query->where('CompanyName', 'LIKE', '%' . $CompanyName . '%');
+        }
+    
+        if ($CompanyCode) {
+            $query->where('CompanyCode', 'LIKE', '%' . $CompanyCode . '%');
+        }
+    
+        // Execute the query and get the results
+        $companies = $query->get();
+
+        if(count($companies) < 1){
+            return response()->json(['message' => 'Companies Empty', "data" => $companies, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
+        }
+    
+        return response()->json(['message' => 'Companies Found', "data" => $companies, "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 
     // POST /companies
@@ -32,7 +54,7 @@ class CompanyController extends Controller
             'ChangeWho' => 'TEST_ADMIN'
         ]);
 
-        return response()->json($companyData, Response::HTTP_CREATED);
+        return response()->json(['message' => 'Success', "data" => $companyData, "status" => Response::HTTP_CREATED], Response::HTTP_CREATED);
     }
 
     // GET /companies/{id}
@@ -41,10 +63,10 @@ class CompanyController extends Controller
         $companyRecord = Companies::find($id);
 
         if(!$companyRecord) {
-            return response()->json(['message' => 'Company not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Company not found', "data" => $companyRecord, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
-        return response()->json($companyRecord, Response::HTTP_OK);
+        return response()->json(['message' => 'Success', "data" => $companyRecord, "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 
     // PUT /companies/{id}
@@ -53,7 +75,7 @@ class CompanyController extends Controller
         $companyRecord = Companies::find($id);
 
         if(!$companyRecord) {
-            return response()->json(['message' => 'Company not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Company not found', "data" => $companyRecord, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
         $validatedData = $request->validate([
@@ -67,7 +89,8 @@ class CompanyController extends Controller
             'ChangeWho' => "TEST_ADMIN"
         ]);
 
-        return response()->json($companyRecord, Response::HTTP_OK);
+
+        return response()->json(['message' => 'Success', "data" => $companyRecord, "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 
     // DELETE /companies/{id}
@@ -76,11 +99,11 @@ class CompanyController extends Controller
         $companyRecord = Companies::find($id);
 
         if(!$companyRecord){
-            return response()->json(['message' => 'Company not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Company not found', "data" => $companyRecord, "status" => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
         
         $companyRecord->delete();
 
-        return response()->json(['message' => 'Company deleted successfully'], Response::HTTP_OK);
+        return response()->json(['message' => 'Company deleted successfully', "status" => Response::HTTP_OK], Response::HTTP_OK);
     }
 }
